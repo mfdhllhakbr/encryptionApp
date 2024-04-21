@@ -17,6 +17,24 @@ import math
 encrypted_data = None
 encrypted_file_path = None
 
+def open_encryption_page():
+    # Menutup halaman awal
+    root.withdraw()
+    # Membuka halaman enkripsi
+    encryption_page.deiconify()
+
+def open_decryption_page():
+    # Menutup halaman awal
+    root.withdraw()
+    # Membuka halaman dekripsi
+    decryption_page.deiconify()
+
+def open_compression_page():
+    # Menutup halaman awal
+    root.withdraw()
+    # Membuka halaman dekripsi
+    compression_page.deiconify()
+
 def update_file_path(new_path):
     file_path_entry.delete(0, tk.END)
     file_path_entry.config(state=tk.NORMAL)
@@ -154,53 +172,88 @@ def save_result_file():
     else:
         messagebox.showwarning("Warning", "Tidak ada data yang akan disimpan.")
 
-# GUI parts.
+# Halaman awal
 root = tk.Tk()
-root.title("Aplikasi Enkripsi File Backup Database")
+root.title("Aplikasi Enkripsi/Deskripsi File")
+
+# Pilihan enkripsi atau dekripsi
+label = tk.Label(root, text="Pilih operasi yang ingin dilakukan:", font=("Arial", 20))
+label.pack(pady=20)
+
+encryption_button = tk.Button(root, text="Enkripsi", font=("Arial", 16), command=open_encryption_page)
+encryption_button.pack(pady=10)
+
+decryption_button = tk.Button(root, text="Dekripsi", font=("Arial", 16), command=open_decryption_page)
+decryption_button.pack(pady=10)
+
+compression_button = tk.Button(root, text="Kompresi", font=("Arial", 16), command=open_compression_page)
+compression_button.pack(pady=10)
+
+# Halaman enkripsi
+encryption_page = tk.Toplevel(root)
+encryption_page.title("Aplikasi Enkripsi File Backup Database")
 
 private_key, public_key = generate_rsa_key_pair()
 
-file_label = tk.Label(root, text="Pilih file .bak:", font=("Arial, 20"))
+file_label = tk.Label(encryption_page, text="Pilih file .bak:", font=("Arial, 20"))
 file_label.place(x=20, y=30)
 
-frame = tk.Frame(root, highlightthickness=1, highlightbackground="black", bd=0)
+frame = tk.Frame(encryption_page, highlightthickness=1, highlightbackground="black", bd=0)
 frame.place(x=20, y=65)
 file_path_entry = tk.Entry(frame, width=58, font=("Arial", 15), state=tk.DISABLED)
 file_path_entry.pack(fill="both")
 file_path_entry.config(state=tk.DISABLED)
 
-browse_file_button = tk.Button(root, text="Browse", font=("Arial, 20"), command=lambda: update_file_path(filedialog.askopenfilename(filetypes=[("Backup Database Files", "*.bak")])))
+browse_file_button = tk.Button(encryption_page, text="Browse", font=("Arial, 20"), command=lambda: update_file_path(filedialog.askopenfilename(filetypes=[("Backup Database Files", "*.bak")])))
 browse_file_button.place(x=560, y = 63)
 
 # Bagian switching.
-switch_label = tk.Label(root, text="Pilih metode enkripsi:", font=("Arial, 20"))
+switch_label = tk.Label(encryption_page, text="Pilih metode enkripsi:", font=("Arial, 20"))
 switch_label.place(x=20, y=120)
 
 encryption_method = tk.IntVar()
 encryption_method.set(1)  # Default = rsa. 
-toggle_rsa = tk.Radiobutton(root, text="RSA", font=("Arial", 20), variable=encryption_method, value=1)
+toggle_rsa = tk.Radiobutton(encryption_page, text="RSA", font=("Arial", 20), variable=encryption_method, value=1)
 toggle_rsa.place(x=20, y=150)
-toggle_twofish = tk.Radiobutton(root, text="Twofish", font=("Arial", 20), variable=encryption_method, value=2)
+toggle_twofish = tk.Radiobutton(encryption_page, text="Twofish", font=("Arial", 20), variable=encryption_method, value=2)
 toggle_twofish.place(x=140, y=150)
 
-encrypt_button = tk.Button(root, text="Mulai Enkripsi", font=("Arial", 20), command=lambda: encrypt_rsa() if encryption_method.get() == 1 else encrypt_twofish())
+encrypt_button = tk.Button(encryption_page, text="Mulai Enkripsi", font=("Arial", 20), command=lambda: encrypt_rsa() if encryption_method.get() == 1 else encrypt_twofish())
 encrypt_button.place(x=20, y=180)
 
 # Label waktu.
-estimated_time_label = tk.Label(root, text="", font=("Arial", 15))
+estimated_time_label = tk.Label(encryption_page, text="", font=("Arial", 15))
 estimated_time_label.place(x=200, y=184)
 
-save_button = tk.Button(root, text="Save", font=("Arial", 20), command=save_result_file, state=tk.DISABLED)
+save_button = tk.Button(encryption_page, text="Save", font=("Arial", 20), command=save_result_file, state=tk.DISABLED)
 save_button.place(x=20, y=230)
 
 width = 680
 height = 300
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+screen_width = encryption_page.winfo_screenwidth()
+screen_height = encryption_page.winfo_screenheight()
 
 x_coordinate = (screen_width - width) // 2
 y_coordinate = (screen_height - height) // 2
 
-root.geometry(f"{width}x{height}+{x_coordinate}+{y_coordinate}")
+encryption_page.geometry(f"{width}x{height}+{x_coordinate}+{y_coordinate}")
+encryption_page.protocol("WM_DELETE_WINDOW", lambda: [root.deiconify(), encryption_page.withdraw()])
+
+# Halaman dekripsi
+decryption_page = tk.Toplevel(root)
+decryption_page.title("Halaman Dekripsi")
+decryption_page.geometry("600x400")
+decryption_page.protocol("WM_DELETE_WINDOW", lambda: [root.deiconify(), decryption_page.withdraw()])
+
+# Halaman compression
+compression_page = tk.Toplevel(root)
+compression_page.title("Halaman Kompresi")
+compression_page.geometry("600x400")
+compression_page.protocol("WM_DELETE_WINDOW", lambda: [root.deiconify(), compression_page.withdraw()])
+
+# Jangan lupa untuk menyembunyikan kedua halaman terkait
+encryption_page.withdraw()
+decryption_page.withdraw()
+compression_page.withdraw()
 
 root.mainloop()
