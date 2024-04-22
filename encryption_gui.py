@@ -70,8 +70,6 @@ def encrypt_chunk(chunk, public_key):
 def encrypt_rsa():
     global encrypted_data, encrypted_file_path
 
-    estimated_time_label.config(text=f"Loading...")
-
     try:
         file_path = file_path_entry.get()
 
@@ -109,41 +107,43 @@ def encrypt_rsa():
 def encrypt_twofish():
     global encrypted_data, encrypted_file_path
     
-    estimated_time_label.config(text=f"Loading...")
+    try:
+        bak_file = file_path_entry.get()
 
-    bak_file = file_path_entry.get()
-    key = b'your_secure_encryption_key_here'
+        key = b'your_secure_encryption_key_here'
 
-    cipher = Twofish(key)
+        cipher = Twofish(key)
 
-    with open(bak_file, 'rb') as f:
-        # Baca lines
-        data = f.read()
-        
-    # Use tqdm for progress bar
-    with tqdm(total=len(data), unit='B', unit_scale=True, unit_divisor=1024, desc="Encrypting") as pbar:
-        ciphertext_blocks = []
-        start_time = time.time()
+        with open(bak_file, 'rb') as f:
+            # Baca lines
+            data = f.read()
+            
+        # Use tqdm for progress bar
+        with tqdm(total=len(data), unit='B', unit_scale=True, unit_divisor=1024, desc="Encrypting") as pbar:
+            ciphertext_blocks = []
+            start_time = time.time()
 
-        for i in range(0, len(data), 16):
-            block = data[i:i+16]
-            if len(block) < 16:
-                padding_length = 16 - len(block)
-                block += bytes([padding_length]) * padding_length
+            for i in range(0, len(data), 16):
+                block = data[i:i+16]
+                if len(block) < 16:
+                    padding_length = 16 - len(block)
+                    block += bytes([padding_length]) * padding_length
 
-            ciphertext_block = cipher.encrypt(block)
-            ciphertext_blocks.append(ciphertext_block)
-            pbar.update(len(block))  # Update progress bar for each block
+                ciphertext_block = cipher.encrypt(block)
+                ciphertext_blocks.append(ciphertext_block)
+                pbar.update(len(block))  # Update progress bar for each block
 
-    elapsed_time = time.time() - start_time
-    encrypted_data = b''.join(ciphertext_blocks)
+        elapsed_time = time.time() - start_time
+        encrypted_data = b''.join(ciphertext_blocks)
 
-    hours, remainder = divmod(elapsed_time, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
-    # estimated_time_label.config(text=f"Waktu enkripsi: {elapsed_time:.5f} detik.")
-    save_button.config(state='normal')
-    messagebox.showinfo("Information", f"Enkripsi selesai!")
+        hours, remainder = divmod(elapsed_time, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+        # estimated_time_label.config(text=f"Waktu enkripsi: {elapsed_time:.5f} detik.")
+        save_button.config(state='normal')
+        messagebox.showinfo("Information", f"Enkripsi selesai!")
+    except Exception as e:
+        messagebox.showerror("Error", "Encryption failed for file.\nError message: " + str(e))
 
 def save_result_file():
     global encrypted_data, encrypted_file_path
