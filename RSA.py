@@ -1,9 +1,7 @@
 import os
 import math
 import time
-import threading
 import tkinter as tk
-from tqdm import tqdm
 import EncryptionApp as app
 from tkinter import ttk, filedialog, messagebox
 from cryptography.hazmat.primitives import hashes
@@ -115,6 +113,7 @@ def encrypt_chunk(chunk, public_key):
 def encrypt_rsa(root):
     public_pem = text_public_key.get(1.0, tk.END).strip()
     public_key = pem_to_public_key(public_pem.encode('utf-8'))
+    encrypt_estimated_time_label.config(text="")
     global encrypted_data, encrypted_file_path
 
     try:
@@ -167,7 +166,6 @@ def save_encrypted_result_file():
                 f.write(encrypted_data)
             messagebox.showinfo("Information", "File berhasil disimpan!")
             btn_save_encrypted.config(state='disabled')
-            encrypt_estimated_time_label.config(text="")
             entry_file_encrypt.config(textvariable="")
             entry_file_encrypt.delete(0, tk.END)
             entry_pubkey.delete(1.0, tk.END)
@@ -193,6 +191,7 @@ def decrypt_chunk(chunk, private_key):
 def decrypt_rsa(root):
     private_pem = entry_privkey.get(1.0, tk.END).strip()
     private_key = pem_to_private_key(private_pem.encode('utf-8'))
+    encrypt_estimated_time_label.config(text="")
     global decrypted_data, decrypted_file_path
 
     try:
