@@ -1,17 +1,9 @@
 import os
-import math
 import time
-import threading
 import tkinter as tk
-from tqdm import tqdm
 import EncryptionApp as app
 from twofish import Twofish
 from tkinter import ttk, filedialog, messagebox
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.asymmetric import padding
 
 global encrypted_data
 encrypted_data = None
@@ -28,9 +20,8 @@ def update_file_path(entry, new_path):
 
 def encrypt_twofish(root):
     global encrypted_data, encrypted_file_path
-
+    encrypt_estimated_time_label.config(text="")
     bak_file = entry_file_encrypt.get()
-
     password = entry_pubkey.get("1.0", "end-1c").encode()
     
     if len(password) < 16:
@@ -97,7 +88,6 @@ def save_encrypted_result_file():
                 f.write(encrypted_data)
             messagebox.showinfo("Information", "File berhasil disimpan!")
             btn_save_encrypted.config(state='disabled')
-            encrypt_estimated_time_label.config(text="")
             entry_file_encrypt.config(textvariable="")
             entry_file_encrypt.delete(0, tk.END)
             entry_pubkey.delete(1.0, tk.END)
@@ -107,9 +97,8 @@ def save_encrypted_result_file():
 
 def decrypt_twofish(root):
     global decrypted_data, decrypted_file_path
-
+    decrypt_estimated_time_label.config(text="")
     encrypted_file = entry_file_decrypt.get()
-
     password = entry_privkey.get("1.0", "end-1c").encode()
 
     if len(password) < 16:
@@ -178,7 +167,6 @@ def save_decrypted_result_file():
                 f.write(decrypted_data)
             messagebox.showinfo("Information", "File berhasil disimpan!")
             btn_save_decrypted.config(state='disabled')
-            decrypt_estimated_time_label.config(text="")
             entry_file_decrypt.config(textvariable="")
             entry_file_decrypt.delete(0, tk.END)
             entry_privkey.delete(1.0, tk.END)
