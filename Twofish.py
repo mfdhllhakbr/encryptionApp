@@ -19,15 +19,6 @@ encrypted_data = None
 global encrypted_file_path
 encrypted_file_path = None
 
-def save_to_txt(text_widget):
-    file_path = filedialog.asksaveasfilename(defaultextension=".txt",
-                                             filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        text = text_widget.get(1.0, tk.END)
-        with open(file_path, 'w') as file:
-            file.write(text)
-        messagebox.showinfo("Save to TXT", f"Text has been saved to {file_path}")
-
 def update_file_path(entry, new_path):
     entry.delete(0, tk.END)
     entry.config(state=tk.NORMAL)
@@ -52,13 +43,10 @@ def encrypt_twofish(root):
     cipher = Twofish(password)
 
     with open(bak_file, 'rb') as f:
-        # Baca lines
         data = f.read()
     
     encrypt_progress_bar['maximum'] = len(data)
     encrypt_progress_bar['value'] = 0
-    # Use tqdm for progress bar
-    # with tqdm(total=len(data), unit='B', unit_scale=True, unit_divisor=1024, desc="Encrypting") as pbar:
     ciphertext_blocks = []
     start_time = time.time()
 
@@ -67,8 +55,6 @@ def encrypt_twofish(root):
 
     for i in range(0, len(data), 16):
         block = data[i:i+16]
-        # encrypt_progress_bar['value'] += len(block)
-        # root.update_idletasks()
         if len(block) < 16:
             padding_length = 16 - len(block)
             block += bytes([padding_length]) * padding_length
@@ -94,7 +80,6 @@ def encrypt_twofish(root):
     hours, remainder = divmod(elapsed_time, 3600)
     minutes, seconds = divmod(remainder, 60)
     encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
-    # estimated_time_label.config(text=f"Waktu enkripsi: {elapsed_time:.5f} detik.")
     btn_save_encrypted.config(state='normal')
     messagebox.showinfo("Information", f"Enkripsi selesai!")
 
@@ -201,7 +186,6 @@ def save_decrypted_result_file():
     else:
         messagebox.showwarning("Warning", "Tidak ada data yang akan disimpan.")
 
-
 def show_window(root):
     for widget in root.winfo_children():
         widget.destroy()
@@ -251,8 +235,6 @@ def show_window(root):
     separator = ttk.Separator(root, orient='vertical')
     separator.place(x=400, y=0, width = 2, height= 650)
 
-
-
     # DECRYPT
     label_decrypt = tk.Label(root, text="Decrypt File", font=("Arial", 24))
     label_decrypt.place(x=420, y=160)
@@ -293,9 +275,6 @@ def show_window(root):
     decrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     decrypt_estimated_time_label.place(x=420, y=500, height=30, width=350)
 
-
-
     # BACK
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)
-
