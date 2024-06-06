@@ -16,17 +16,7 @@ def compress_file(input_file):
         global compressed_data
         with open(input_file, 'rb') as f_in:
             data = f_in.read()
-            total_size = len(data)
-            compressed_data = b""
-            chunk_size = 1024  # Adjust the chunk size as needed
-            for i in range(0, total_size, chunk_size):
-                compressed_data += zlib.compress(data[i:i + chunk_size], level=9)
-                progress = int((i / total_size) * 100)
-                compress_progress_bar['value'] = progress
-                compress_progress_bar.update_idletasks()
-
-            # Finalize compression
-            compressed_data += zlib.compress(data[i:], level=9)
+            compressed_data = zlib.compress(data, level=9)
 
         original_size = os.path.getsize(input_file)
         compressed_size = len(compressed_data)
@@ -41,20 +31,10 @@ def compress_file(input_file):
     # Start the compression in a separate thread
     threading.Thread(target=compression_task).start()
 
-# def compress_file(input_file):
-#     global compressed_data
-#     with open(input_file, 'rb') as f_in:
-#         data = f_in.read()
-#         compressed_data = zlib.compress(data, level=9)
-    # original_size = os.path.getsize(input_file)
-    # compressed_size = len(compressed_data)
-    # print(f'Original size: {original_size} bytes')
-    # print(f'Compressed size: {compressed_size} bytes')
-
 def save_compressed_file():
     global compressed_data
     if compressed_data is not None:
-        output_file = filedialog.asksaveasfilename()
+        output_file = filedialog.asksaveasfilename(defaultextension=".deflate", filetypes=[("Deflate files", "*.deflate")])
         if output_file:
             with open(output_file, 'wb') as f_out:
                 f_out.write(compressed_data)
@@ -74,10 +54,10 @@ def update_file_path(entry, new_path):
 
 def start_compression():
     file_path = entry_file_compress.get()
-    if file_path:
+    if file_path.endswith('.bak'):
         compress_file(file_path)
     else:
-        messagebox.showwarning("Peringatan", "Pilih file terlebih dahulu!")
+        messagebox.showwarning("Peringatan", "Pilih file .bak untuk dikompres!")
 
 def show_window(root):
     for widget in root.winfo_children():
