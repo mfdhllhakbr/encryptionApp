@@ -32,8 +32,6 @@ def generate_rsa_key_pair():
     )
     
     public_key = private_key.public_key()
-    # print("private key: ", private_key)
-    # print("public key: ", public_key)
 
     private_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -47,11 +45,6 @@ def generate_rsa_key_pair():
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
     return public_pem, private_pem
-
-# def clean_pem(pem_data):
-#     lines = pem_data.decode('utf-8').splitlines()
-#     cleaned_data = ''.join(lines[1:-1])  # Menggabungkan semua baris kecuali yang pertama dan terakhir
-#     return cleaned_data
 
 def pem_to_public_key(public_pem):
     public_key = serialization.load_pem_public_key(
@@ -70,9 +63,6 @@ def pem_to_private_key(private_pem):
 
 def update_keys():
     public_pem, private_pem = generate_rsa_key_pair()
-    
-    # public_pem = clean_pem(public_pem)
-    # private_pem = clean_pem(private_pem)
 
     text_public_key.config(state=tk.NORMAL)
     text_public_key.delete(1.0, tk.END)
@@ -106,13 +96,6 @@ def update_file_path(entry, new_path):
     entry.insert(0, new_path)
     entry.config(state=tk.DISABLED)
 
-# def ensure_pem_format(pem_data, pem_type):
-#     pem_header = f"-----BEGIN {pem_type}-----"
-#     pem_footer = f"-----END {pem_type}-----"
-#     if not pem_data.startswith(pem_header):
-#         pem_data = f"{pem_header}\n{pem_data}\n{pem_footer}"
-#     return pem_data
-
 def encrypt_chunk(chunk, public_key):
     try:
         cipher_text = public_key.encrypt(
@@ -131,11 +114,8 @@ def encrypt_chunk(chunk, public_key):
     
 def encrypt_rsa(root):
     public_pem = text_public_key.get(1.0, tk.END).strip()
-    # public_pem = ensure_pem_format(public_pem, pem_type="PUBLIC KEY")
     public_key = pem_to_public_key(public_pem.encode('utf-8'))
     global encrypted_data, encrypted_file_path
-
-    # estimated_time_label.config(text=f"Loading...")
 
     try:
         file_path = entry_file_encrypt.get()
@@ -146,7 +126,6 @@ def encrypt_rsa(root):
             chunk_num = 0
             total_chunks = math.ceil(os.path.getsize(file_path) / 128)  # Kecilin dulu chunk size-nya sesuai key.
             encrypt_progress_bar["maximum"] = total_chunks
-            # with tqdm(total=total_chunks) as pbar:
             while True:
                 chunk = f.read(128)
                 if not chunk:
@@ -169,7 +148,6 @@ def encrypt_rsa(root):
         minutes, seconds = divmod(remainder, 60)
         encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
         encrypted_data = b''.join(encrypted_chunks)
-        # estimated_time_label.config(text=f"Waktu enkripsi: {elapsed_time:.5f} detik.")
         btn_save_encrypted.config(state='normal')
         messagebox.showinfo("Information", f"Enkripsi selesai!")
     except Exception as e:
@@ -212,47 +190,6 @@ def decrypt_chunk(chunk, private_key):
         print(f"Error decrypting chunk: {chunk}, {e}")
         return None
 
-# def decrypt_rsa(root):
-#     private_pem = entry_privkey.get(1.0, tk.END).strip()
-#     private_key = pem_to_private_key(private_pem.encode('utf-8'))
-#     global encrypted_data, encrypted_file_path
-
-#     try:
-#         file_path = entry_file_decrypt.get()
-
-#         with open(file_path, 'rb') as f:
-#             start_time = time.time()
-#             decrypted_chunks = []
-#             chunk_num = 0
-#             total_chunks = math.ceil(os.path.getsize(file_path) / 256)  # Adjust chunk size accordingly
-#             decrypt_progress_bar["maximum"] = total_chunks
-#             # with tqdm(total=total_chunks) as pbar:
-#             while True:
-#                 chunk = f.read(256)  # Adjust chunk size accordingly
-#                 if not chunk:
-#                     break
-                
-#                 decrypted_chunk = decrypt_chunk(chunk, private_key)
-
-#                 if decrypted_chunk:
-#                     decrypted_chunks.append(decrypted_chunk)
-#                     chunk_num += 1
-#                     decrypt_progress_bar["value"] = chunk_num
-#                     root.update_idletasks()  # Update the progress bar
-#                 else:
-#                     messagebox.showerror("Error", "Failed to decrypt and save chunk.")
-#                     return
-
-#         elapsed_time = time.time() - start_time
-#         hours, remainder = divmod(elapsed_time, 3600)
-#         minutes, seconds = divmod(remainder, 60)
-#         decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
-#         decrypted_data = b''.join(decrypted_chunks)
-#         btn_save_decrypted.config(state='normal')
-#         messagebox.showinfo("Information", f"Dekripsi selesai!")
-#     except Exception as e:
-#         messagebox.showerror("Error", "Decryption failed for file.\nError message: " + str(e))
-        
 def decrypt_rsa(root):
     private_pem = entry_privkey.get(1.0, tk.END).strip()
     private_key = pem_to_private_key(private_pem.encode('utf-8'))
@@ -289,7 +226,7 @@ def decrypt_rsa(root):
                         next_update = time.time() + update_interval
 
                 else:
-                    messagebox.showerror("Error", "Failed to decrypt and save chunk.")
+                    messagebox.showerror("Error", "Failed to decrypt file,\nInvalid private key.")
                     return
 
         elapsed_time = time.time() - start_time
@@ -299,6 +236,8 @@ def decrypt_rsa(root):
         decrypted_data = b''.join(decrypted_chunks)
         btn_save_decrypted.config(state='normal')
         messagebox.showinfo("Information", f"Dekripsi selesai!")
+    except ValueError as ve:
+        messagebox.showerror("Error", "Error message: " + str(ve))
     except Exception as e:
         messagebox.showerror("Error", "Decryption failed for file.\nError message: " + str(e))
 
@@ -353,8 +292,6 @@ def show_window(root):
     btn_save_public = tk.Button(text="Save to TXT", command=lambda: save_to_txt(text_public_key))
     btn_save_public.place(x=280, y=205, width=100, height=30)
 
-
-
     # PRIVATE KEY
     label_private = tk.Label(root, text="Private Key:", font=("Arial", 18))
     label_private.place(x=420, y=90)
@@ -375,8 +312,6 @@ def show_window(root):
 
     separator = ttk.Separator(root, orient='horizontal')
     separator.place(x=0, y=250, width=800, height=2)
-
-
 
     # ENCRYPT
     label_encrypt = tk.Label(root, text="Encrypt File", font=("Arial", 24))
@@ -421,8 +356,6 @@ def show_window(root):
     separator = ttk.Separator(root, orient='vertical')
     separator.place(x=400, y=251, width = 2, height= 430)
 
-
-
     # DECRYPT
     label_decrypt = tk.Label(root, text="Decrypt File", font=("Arial", 24))
     label_decrypt.place(x=420, y=260)
@@ -463,9 +396,6 @@ def show_window(root):
     decrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     decrypt_estimated_time_label.place(x=420, y=600, height=30, width=350)
 
-
-
     # BACK
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)
-
