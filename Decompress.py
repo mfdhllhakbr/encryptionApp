@@ -7,40 +7,6 @@ from tkinter import ttk, filedialog, messagebox
 
 decompressed_data = None
 
-# def decompress_file(input_file):
-#     global decompressed_data
-#     decompress_progress_bar['value'] = 0
-#     decompress_progress_bar.update_idletasks()
-
-#     def decompression_task():
-#         global decompressed_data
-#         with open(input_file, 'rb') as f_in:
-#             data = f_in.read()
-#             total_size = len(data)
-#             decompressed_data = b""
-#             chunk_size = 1024  # Adjust the chunk size as needed
-#             for i in range(0, total_size, chunk_size):
-#                 decompressed_data += zlib.compress(data[i:i + chunk_size], level=9)
-#                 progress = int((i / total_size) * 100)
-#                 decompress_progress_bar['value'] = progress
-#                 decompress_progress_bar.update_idletasks()
-
-#             # Finalize decompression
-#             decompressed_data += zlib.compress(data[i:], level=9)
-
-#         original_size = os.path.getsize(input_file)
-#         decompressed_size = len(decompressed_data)
-#         # print(f'Original size: {original_size} bytes')
-#         # print(f'decompressed size: {decompressed_size} bytes')
-
-#         decompress_progress_bar['value'] = 100
-#         decompress_progress_bar.update_idletasks()
-#         messagebox.showinfo("Info", "Dekompresi selesai!")
-#         btn_save_decompress.config(state='normal')
-
-#     # Start the compressedion in a separate thread
-#     threading.Thread(target=decompression_task).start()
-
 def decompress_file(input_file):
     global decompressed_data
     decompress_progress_bar['value'] = 0
@@ -50,9 +16,8 @@ def decompress_file(input_file):
         global decompressed_data
         with open(input_file, 'rb') as f_in:
             data = f_in.read()
-            total_size = len(data)
             decompressed_data = zlib.decompress(data)
-            
+
         original_size = os.path.getsize(input_file)
         decompressed_size = len(decompressed_data)
         # print(f'Original size: {original_size} bytes')
@@ -63,13 +28,12 @@ def decompress_file(input_file):
         messagebox.showinfo("Info", "Dekompresi selesai!")
         btn_save_decompress.config(state='normal')
 
-    # Start the decompression in a separate thread
     threading.Thread(target=decompression_task).start()
 
 def save_decompressed_file():
     global decompressed_data
     if decompressed_data is not None:
-        output_file = filedialog.asksaveasfilename()
+        output_file = filedialog.asksaveasfilename(defaultextension=".bak", filetypes=[("BAK files", "*.bak")])
         if output_file:
             with open(output_file, 'wb') as f_out:
                 f_out.write(decompressed_data)
@@ -89,10 +53,10 @@ def update_file_path(entry, new_path):
 
 def start_decompress():
     file_path = entry_file_decompress.get()
-    if file_path:
+    if file_path.endswith('.deflate'):
         decompress_file(file_path)
     else:
-        messagebox.showwarning("Peringatan", "Pilih file terlebih dahulu!")
+        messagebox.showwarning("Peringatan", "Pilih file .deflate untuk didekompresi!")
 
 def show_window(root):
     for widget in root.winfo_children():
