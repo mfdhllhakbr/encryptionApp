@@ -1,5 +1,5 @@
-import os
 import zlib
+import time
 import threading
 import tkinter as tk
 import EncryptionApp as app
@@ -12,21 +12,47 @@ def decompress_file(input_file):
     decompress_progress_bar['value'] = 0
     decompress_progress_bar.update_idletasks()
 
+    decompress_estimated_time_label.config(text="")
+
+    # Validasi ekstensi file
+    if not input_file.endswith('.bak.deflate'):
+        messagebox.showerror("Error", "File harus berformat .bak.deflate")
+        return
+
     def decompression_task():
         global decompressed_data
         with open(input_file, 'rb') as f_in:
             data = f_in.read()
-            decompressed_data = zlib.decompress(data)
+            decompress_progress_bar['maximum'] = len(data)
+            decompress_progress_bar['value'] = 0
+            batch_size = 1024 * 10  # Batasi pembaruan progress bar setiap 10KB
+            next_update = batch_size
+            
+            decompressor = zlib.decompressobj()
+            decompressed_data_chunks = []
+            start_time = time.time()
+            
+            for i in range(0, len(data), 1024):
+                chunk = data[i:i+1024]
+                decompressed_chunk = decompressor.decompress(chunk)
+                decompressed_data_chunks.append(decompressed_chunk)
 
-        original_size = os.path.getsize(input_file)
-        decompressed_size = len(decompressed_data)
-        # print(f'Original size: {original_size} bytes')
-        # print(f'Decompressed size: {decompressed_size} bytes')
+                if decompress_progress_bar['value'] + len(chunk) >= next_update:
+                    decompress_progress_bar['value'] += len(chunk)
+                    next_update += batch_size
+                else:
+                    decompress_progress_bar['value'] += len(chunk)
 
-        decompress_progress_bar['value'] = 100
-        decompress_progress_bar.update_idletasks()
-        messagebox.showinfo("Info", "Dekompresi selesai!")
-        btn_save_decompress.config(state='normal')
+            decompressed_data_chunks.append(decompressor.flush())
+            decompressed_data = b''.join(decompressed_data_chunks)
+            decompress_progress_bar['value'] = len(data)
+
+            elapsed_time = time.time() - start_time
+            hours, remainder = divmod(elapsed_time, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            decompress_estimated_time_label.config(text=f"Waktu dekompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+            messagebox.showinfo("Info", "Dekompresi selesai!")
+            btn_save_decompress.config(state='normal')
 
     threading.Thread(target=decompression_task).start()
 
@@ -89,6 +115,9 @@ def show_window(root):
     decompress_progress_bar = ttk.Progressbar(root, maximum=100)
     decompress_progress_bar.place(x=200, y=480, width=400, height=30)
 
+    global decompress_estimated_time_label
+    decompress_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    decompress_estimated_time_label.place(x=200, y=500, height=30, width=350)
 
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)
