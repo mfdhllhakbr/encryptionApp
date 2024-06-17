@@ -15,14 +15,15 @@ def compress_file(input_file):
     compress_estimated_time_label.config(text="")
 
     # Validasi ekstensi file
-    if not input_file.endswith('.bak'):
-        messagebox.showerror("Error", "File harus berformat .bak")
+    if not input_file.endswith('.encrypted'):
+        messagebox.showerror("Error", "File harus berformat .encrypted")
         return
 
     def compression_task():
         global compressed_data
         with open(input_file, 'rb') as f_in:
             data = f_in.read()
+            original_size = len(data) # Ukuran file sebelum di kompresi
             compress_progress_bar['maximum'] = len(data)
             compress_progress_bar['value'] = 0
             batch_size = 1024 * 10  # Batasi pembaruan progress bar setiap 10KB
@@ -45,12 +46,19 @@ def compress_file(input_file):
 
             compressed_data_chunks.append(compressor.flush())
             compressed_data = b''.join(compressed_data_chunks)
+            compressed_size = len(compressed_data)  # Ukuran file setelah kompresi
             compress_progress_bar['value'] = len(data)
 
             elapsed_time = time.time() - start_time
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
             compress_estimated_time_label.config(text=f"Waktu kompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+            
+            original_size_kb = original_size / 1024
+            compressed_size_kb = compressed_size / 1024
+            original_size_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:.5f} KB")
+            compressed_size_label.config(text=f"Ukuran setelah kompresi: {compressed_size_kb:.5f} KB")
+            
             messagebox.showinfo("Info", "Kompresi selesai!")
             btn_save_compressed.config(state='normal')
 
@@ -109,8 +117,16 @@ def show_window(root):
     compress_progress_bar.place(x=200, y=480, width=400, height=30)
 
     global compress_estimated_time_label
-    compress_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
-    compress_estimated_time_label.place(x=200, y=500, height=30, width=350)
+    compress_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=400)
+    compress_estimated_time_label.place(x=200, y=500, height=30, width=400)
+
+    global original_size_label
+    original_size_label = tk.Message(root, text="", font=("Arial", 14), width=400)
+    original_size_label.place(x=200, y=540, height=30, width=400)
+
+    global compressed_size_label
+    compressed_size_label = tk.Message(root, text="", font=("Arial", 14), width=400)
+    compressed_size_label.place(x=200, y=560, height=30, width=400)
 
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)

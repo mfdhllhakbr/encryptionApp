@@ -23,6 +23,7 @@ def decompress_file(input_file):
         global decompressed_data
         with open(input_file, 'rb') as f_in:
             data = f_in.read()
+            original_size = len(data) # Ukuran file sebelum di kompresi
             decompress_progress_bar['maximum'] = len(data)
             decompress_progress_bar['value'] = 0
             batch_size = 1024 * 10  # Batasi pembaruan progress bar setiap 10KB
@@ -45,12 +46,19 @@ def decompress_file(input_file):
 
             decompressed_data_chunks.append(decompressor.flush())
             decompressed_data = b''.join(decompressed_data_chunks)
+            decompressed_size = len(decompressed_data)  # Ukuran file setelah kompresi
             decompress_progress_bar['value'] = len(data)
 
             elapsed_time = time.time() - start_time
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
             decompress_estimated_time_label.config(text=f"Waktu dekompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+            
+            original_size_kb = original_size / 1024
+            decompressed_size_kb = decompressed_size / 1024
+            original_size_label.config(text=f"Ukuran file kompresi: {original_size_kb:.5f} KB")
+            decompressed_size_label.config(text=f"Ukuran setelah dekompresi: {decompressed_size_kb:.5f} KB")
+            
             messagebox.showinfo("Info", "Dekompresi selesai!")
             btn_save_decompress.config(state='normal')
 
@@ -59,7 +67,7 @@ def decompress_file(input_file):
 def save_decompressed_file():
     global decompressed_data
     if decompressed_data is not None:
-        output_file = filedialog.asksaveasfilename(defaultextension=".bak", filetypes=[("BAK files", "*.bak")])
+        output_file = filedialog.asksaveasfilename(defaultextension=".encrypted", filetypes=[("Encrypted Files", ".encrypted")])
         if output_file:
             with open(output_file, 'wb') as f_out:
                 f_out.write(decompressed_data)
@@ -118,6 +126,14 @@ def show_window(root):
     global decompress_estimated_time_label
     decompress_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     decompress_estimated_time_label.place(x=200, y=500, height=30, width=350)
+
+    global original_size_label
+    original_size_label = tk.Message(root, text="", font=("Arial", 14), width=400)
+    original_size_label.place(x=200, y=540, height=30, width=400)
+
+    global decompressed_size_label
+    decompressed_size_label = tk.Message(root, text="", font=("Arial", 14), width=400)
+    decompressed_size_label.place(x=200, y=560, height=30, width=400)
 
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)
