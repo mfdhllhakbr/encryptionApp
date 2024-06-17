@@ -23,6 +23,7 @@ global decrypted_data
 decrypted_data = None
 
 def generate_rsa_key_pair():
+    time.sleep(2)
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
