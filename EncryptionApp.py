@@ -18,16 +18,16 @@ def show_main_page(root):
     root.title("Halaman Utama")
     
     # Membuat tombol-tombol untuk setiap fitur
-    btn_feature1 = tk.Button(root, text="Enkripsi RSA", command=lambda: rsa.show_window(root))
+    btn_feature1 = tk.Button(root, text="RSA", command=lambda: rsa.show_window(root))
     btn_feature1.place(x=150, y=225, width=200, height=50)
     
-    btn_feature2 = tk.Button(root, text="Enkripsi Twofish", command=lambda: tf.show_window(root))
+    btn_feature2 = tk.Button(root, text="Twofish", command=lambda: tf.show_window(root))
     btn_feature2.place(x=450, y=225, width=200, height=50)
     
-    btn_feature3 = tk.Button(root, text="Kompresi", command=lambda: compress.show_window(root))
+    btn_feature3 = tk.Button(root, text="Kompresi\nDeflate", command=lambda: compress.show_window(root))
     btn_feature3.place(x=150, y=350, width=200, height=50)
     
-    btn_feature4 = tk.Button(root, text="Dekompresi", command=lambda: decompress.show_window(root))
+    btn_feature4 = tk.Button(root, text="Dekompresi\nDeflate", command=lambda: decompress.show_window(root))
     btn_feature4.place(x=450, y=350, width=200, height=50)
 
 if __name__ == "__main__":
