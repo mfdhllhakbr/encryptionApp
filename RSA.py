@@ -121,11 +121,16 @@ def encrypt_rsa(root):
         file_path = entry_file_encrypt.get()
 
         with open(file_path, 'rb') as f:
-            start_time = time.time()
-            encrypted_chunks = []
-            chunk_num = 0
-            total_chunks = math.ceil(os.path.getsize(file_path) / 128)  # Kecilin dulu chunk size-nya sesuai key.
-            encrypt_progress_bar["maximum"] = total_chunks
+            file_data = f.read()
+            original_size = len(file_data)
+
+        start_time = time.time()
+        encrypted_chunks = []
+        chunk_num = 0
+        total_chunks = math.ceil(original_size / 128)  # Kecilkan dulu chunk size-nya sesuai key.
+        encrypt_progress_bar["maximum"] = total_chunks
+
+        with open(file_path, 'rb') as f:
             while True:
                 chunk = f.read(128)
                 if not chunk:
@@ -138,7 +143,6 @@ def encrypt_rsa(root):
                     chunk_num += 1
                     encrypt_progress_bar["value"] = chunk_num
                     root.update_idletasks()  # Update the progress bar
-                    # pbar.update()
                 else:
                     messagebox.showerror("Error", "Failed to encrypt and save chunk.")
                     return
@@ -147,7 +151,16 @@ def encrypt_rsa(root):
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
         encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+        
         encrypted_data = b''.join(encrypted_chunks)
+        encrypted_size = len(encrypted_data)  # Ukuran file setelah enkripsi
+
+        
+        original_size_kb = int(original_size / 1024)
+        encrypted_size_kb = int(encrypted_size / 1024)
+        original_size_encrypt_label.config(text=f"Ukuran sebelum enkripsi: {original_size_kb:} KB")
+        encrypted_size_label.config(text=f"Ukuran setelah enkripsi: {encrypted_size_kb:} KB")
+        
         btn_save_encrypted.config(state='normal')
         messagebox.showinfo("Information", f"Enkripsi selesai!")
     except Exception as e:
@@ -199,16 +212,19 @@ def decrypt_rsa(root):
         file_path = entry_file_decrypt.get()
 
         with open(file_path, 'rb') as f:
-            start_time = time.time()
-            decrypted_chunks = []
-            chunk_num = 0
-            total_chunks = math.ceil(os.path.getsize(file_path) / 256)  # Adjust chunk size accordingly
-            decrypt_progress_bar["maximum"] = total_chunks
+            file_data = f.read()
+            original_size = len(file_data)
 
-            chunk_size = 256
-            update_interval = 1  # Update progress bar every 1 seconds
-            next_update = time.time() + update_interval
+        start_time = time.time()
+        decrypted_chunks = []
+        total_chunks = math.ceil(os.path.getsize(file_path) / 256)  # Adjust chunk size accordingly
+        decrypt_progress_bar["maximum"] = total_chunks
 
+        chunk_size = 256
+        update_interval = 1  # Update progress bar every 1 seconds
+        next_update = time.time() + update_interval
+
+        with open(file_path, 'rb') as f:
             while True:
                 chunk = f.read(256)  # Adjust chunk size accordingly
                 if not chunk:
@@ -233,7 +249,15 @@ def decrypt_rsa(root):
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
         decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+        
         decrypted_data = b''.join(decrypted_chunks)
+        decrypted_size = len(decrypted_data)  # Ukuran file setelah dekripsi
+
+        original_size_kb = int(original_size / 1024)
+        encrypted_size_kb = int(decrypted_size / 1024)
+        original_size_decrypt_label.config(text=f"Ukuran sebelum dekripsi: {original_size_kb:} KB")
+        decrypted_size_label.config(text=f"Ukuran setelah dekripsi: {encrypted_size_kb:} KB")
+
         btn_save_decrypted.config(state='normal')
         messagebox.showinfo("Information", f"Dekripsi selesai!")
     except ValueError as ve:
@@ -353,6 +377,14 @@ def show_window(root):
     encrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     encrypt_estimated_time_label.place(x=30, y=600, height=30, width=350)
 
+    global original_size_encrypt_label
+    original_size_encrypt_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    original_size_encrypt_label.place(x=30, y=640, height=30, width=350)
+
+    global encrypted_size_label
+    encrypted_size_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    encrypted_size_label.place(x=30, y=660, height=30, width=350)
+
     separator = ttk.Separator(root, orient='vertical')
     separator.place(x=400, y=251, width = 2, height= 430)
 
@@ -395,6 +427,14 @@ def show_window(root):
     global decrypt_estimated_time_label
     decrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     decrypt_estimated_time_label.place(x=420, y=600, height=30, width=350)
+
+    global original_size_decrypt_label
+    original_size_decrypt_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    original_size_decrypt_label.place(x=30, y=640, height=30, width=350)
+
+    global decrypted_size_label
+    decrypted_size_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    decrypted_size_label.place(x=30, y=660, height=30, width=350)
 
     # BACK
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))

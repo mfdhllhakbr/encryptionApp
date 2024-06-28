@@ -92,8 +92,8 @@ def encrypt_twofish(root):
     
     original_size_kb = int(original_size / 1024)
     encrypted_size_kb = int(encrypted_size / 1024)
-    original_size_encrypt_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:} KB")
-    encrypted_size_label.config(text=f"Ukuran setelah kompresi: {encrypted_size_kb:} KB")
+    original_size_encrypt_label.config(text=f"Ukuran sebelum enkripsi: {original_size_kb:} KB")
+    encrypted_size_label.config(text=f"Ukuran setelah enkripsi: {encrypted_size_kb:} KB")
     
     btn_save_encrypted.config(state='normal')
     messagebox.showinfo("Information", f"Enkripsi selesai!")
@@ -190,8 +190,8 @@ def decrypt_twofish(root):
     
     original_size_kb = int(original_size / 1024)
     decrypted_size_kb = int(decrypted_size / 1024)
-    original_size_decrypt_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:} KB")
-    decrypted_size_label.config(text=f"Ukuran setelah kompresi: {decrypted_size_kb:} KB")
+    original_size_decrypt_label.config(text=f"Ukuran sebelum dekripsi: {original_size_kb:} KB")
+    decrypted_size_label.config(text=f"Ukuran setelah dekripsi: {decrypted_size_kb:} KB")
     
     btn_save_decrypted.config(state='normal')
     messagebox.showinfo("Information", f"Dekripsi selesai!")

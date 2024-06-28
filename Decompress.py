@@ -56,7 +56,7 @@ def decompress_file(input_file):
             
             original_size_kb = int(original_size / 1024)
             decompressed_size_kb = int(decompressed_size / 1024)
-            original_size_label.config(text=f"Ukuran file kompresi: {original_size_kb:} KB")
+            original_size_label.config(text=f"Ukuran sebelum dekompresi: {original_size_kb:} KB")
             decompressed_size_label.config(text=f"Ukuran setelah dekompresi: {decompressed_size_kb:} KB")
             
             messagebox.showinfo("Info", "Dekompresi selesai!")
