@@ -430,11 +430,11 @@ def show_window(root):
 
     global original_size_decrypt_label
     original_size_decrypt_label = tk.Message(root, text="", font=("Arial", 14), width=350)
-    original_size_decrypt_label.place(x=30, y=590, height=30, width=350)
+    original_size_decrypt_label.place(x=420, y=590, height=30, width=350)
 
     global decrypted_size_label
     decrypted_size_label = tk.Message(root, text="", font=("Arial", 14), width=350)
-    decrypted_size_label.place(x=30, y=610, height=30, width=350)
+    decrypted_size_label.place(x=420, y=610, height=30, width=350)
 
     # BACK
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
