@@ -88,7 +88,7 @@ def encrypt_twofish(root):
 
     hours, remainder = divmod(elapsed_time, 3600)
     minutes, seconds = divmod(remainder, 60)
-    encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+    encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
     
     original_size_kb = int(original_size / 1024)
     encrypted_size_kb = int(encrypted_size / 1024)
@@ -186,7 +186,7 @@ def decrypt_twofish(root):
 
     hours, remainder = divmod(elapsed_time, 3600)
     minutes, seconds = divmod(remainder, 60)
-    decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+    decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
     
     original_size_kb = int(original_size / 1024)
     decrypted_size_kb = int(decrypted_size / 1024)

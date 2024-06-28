@@ -52,7 +52,7 @@ def decompress_file(input_file):
             elapsed_time = time.time() - start_time
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            decompress_estimated_time_label.config(text=f"Waktu dekompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+            decompress_estimated_time_label.config(text=f"Waktu dekompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
             
             original_size_kb = int(original_size / 1024)
             decompressed_size_kb = int(decompressed_size / 1024)

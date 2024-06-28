@@ -150,7 +150,7 @@ def encrypt_rsa(root):
         elapsed_time = time.time() - start_time
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
-        encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+        encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
         
         encrypted_data = b''.join(encrypted_chunks)
         encrypted_size = len(encrypted_data)  # Ukuran file setelah enkripsi
@@ -248,7 +248,7 @@ def decrypt_rsa(root):
         elapsed_time = time.time() - start_time
         hours, remainder = divmod(elapsed_time, 3600)
         minutes, seconds = divmod(remainder, 60)
-        decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+        decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
         
         decrypted_data = b''.join(decrypted_chunks)
         decrypted_size = len(decrypted_data)  # Ukuran file setelah dekripsi
