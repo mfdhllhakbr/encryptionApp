@@ -54,10 +54,10 @@ def decompress_file(input_file):
             minutes, seconds = divmod(remainder, 60)
             decompress_estimated_time_label.config(text=f"Waktu dekompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
             
-            original_size_kb = original_size / 1024
-            decompressed_size_kb = decompressed_size / 1024
-            original_size_label.config(text=f"Ukuran file kompresi: {original_size_kb:.5f} KB")
-            decompressed_size_label.config(text=f"Ukuran setelah dekompresi: {decompressed_size_kb:.5f} KB")
+            original_size_kb = int(original_size / 1024)
+            decompressed_size_kb = int(decompressed_size / 1024)
+            original_size_label.config(text=f"Ukuran file kompresi: {original_size_kb:} KB")
+            decompressed_size_label.config(text=f"Ukuran setelah dekompresi: {decompressed_size_kb:} KB")
             
             messagebox.showinfo("Info", "Dekompresi selesai!")
             btn_save_decompress.config(state='normal')

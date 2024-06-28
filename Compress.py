@@ -52,12 +52,12 @@ def compress_file(input_file):
             elapsed_time = time.time() - start_time
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
-            compress_estimated_time_label.config(text=f"Waktu kompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+            compress_estimated_time_label.config(text=f"Waktu kompresi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.2f} detik.")
             
-            original_size_kb = original_size / 1024
-            compressed_size_kb = compressed_size / 1024
-            original_size_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:.5f} KB")
-            compressed_size_label.config(text=f"Ukuran setelah kompresi: {compressed_size_kb:.5f} KB")
+            original_size_kb = int(original_size / 1024)
+            compressed_size_kb = int(compressed_size / 1024)
+            original_size_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:} KB")
+            compressed_size_label.config(text=f"Ukuran setelah kompresi: {compressed_size_kb:} KB")
             
             messagebox.showinfo("Info", "Kompresi selesai!")
             btn_save_compressed.config(state='normal')
