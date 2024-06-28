@@ -1,15 +1,30 @@
 import os
 import time
 import tkinter as tk
+from tqdm import tqdm
 import EncryptionApp as app
 from twofish import Twofish
 from tkinter import ttk, filedialog, messagebox
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import padding
 
 global encrypted_data
 encrypted_data = None
 
 global encrypted_file_path
 encrypted_file_path = None
+
+def save_to_txt(text_widget):
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt",
+                                             filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    if file_path:
+        text = text_widget.get(1.0, tk.END)
+        with open(file_path, 'w') as file:
+            file.write(text)
+        messagebox.showinfo("Save to TXT", f"Text has been saved to {file_path}")
 
 def update_file_path(entry, new_path):
     entry.delete(0, tk.END)
@@ -20,8 +35,9 @@ def update_file_path(entry, new_path):
 
 def encrypt_twofish(root):
     global encrypted_data, encrypted_file_path
-    encrypt_estimated_time_label.config(text="")
+
     bak_file = entry_file_encrypt.get()
+
     password = entry_pubkey.get("1.0", "end-1c").encode()
     
     if len(password) < 16:
@@ -35,6 +51,7 @@ def encrypt_twofish(root):
 
     with open(bak_file, 'rb') as f:
         data = f.read()
+        original_size = len(data) # Ukuran file sebelum di enrkipsi
     
     encrypt_progress_bar['maximum'] = len(data)
     encrypt_progress_bar['value'] = 0
@@ -63,6 +80,7 @@ def encrypt_twofish(root):
 
     elapsed_time = time.time() - start_time
     encrypted_data = b''.join(ciphertext_blocks)
+    encrypted_size = len(encrypted_data)  # Ukuran file setelah enkripsi
 
     # Pastikan progress bar mencapai nilai maksimum
     encrypt_progress_bar['value'] = len(data)
@@ -71,6 +89,12 @@ def encrypt_twofish(root):
     hours, remainder = divmod(elapsed_time, 3600)
     minutes, seconds = divmod(remainder, 60)
     encrypt_estimated_time_label.config(text=f"Waktu enkripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+    
+    original_size_kb = int(original_size / 1024)
+    encrypted_size_kb = int(encrypted_size / 1024)
+    original_size_encrypt_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:} KB")
+    encrypted_size_label.config(text=f"Ukuran setelah kompresi: {encrypted_size_kb:} KB")
+    
     btn_save_encrypted.config(state='normal')
     messagebox.showinfo("Information", f"Enkripsi selesai!")
 
@@ -85,9 +109,11 @@ def save_encrypted_result_file():
                 file_path += "_rsa.encrypted"
         if file_path:
             with open(file_path, 'wb') as f:
+                f.write(b"TF:" + entry_pubkey.get("1.0", "end-1c").encode()[:16] + b"\n")
                 f.write(encrypted_data)
             messagebox.showinfo("Information", "File berhasil disimpan!")
             btn_save_encrypted.config(state='disabled')
+            encrypt_estimated_time_label.config(text="")
             entry_file_encrypt.config(textvariable="")
             entry_file_encrypt.delete(0, tk.END)
             entry_pubkey.delete(1.0, tk.END)
@@ -97,8 +123,9 @@ def save_encrypted_result_file():
 
 def decrypt_twofish(root):
     global decrypted_data, decrypted_file_path
-    decrypt_estimated_time_label.config(text="")
+
     encrypted_file = entry_file_decrypt.get()
+
     password = entry_privkey.get("1.0", "end-1c").encode()
 
     if len(password) < 16:
@@ -111,7 +138,14 @@ def decrypt_twofish(root):
     cipher = Twofish(password)
 
     with open(encrypted_file, 'rb') as f:
+        metadata_password = f.readline().strip().split(b"TF:")[1]
+
+        if metadata_password != password:
+            messagebox.showerror("Error", "Password tidak cocok dengan password enkripsi!")
+            return
+        
         data = f.read()
+        original_size = len(data) # Ukuran file sebelum di enrkipsi
 
     decrypt_progress_bar['maximum'] = len(data)
     decrypt_progress_bar['value'] = 0
@@ -119,7 +153,8 @@ def decrypt_twofish(root):
     decrypted_blocks = []
     start_time = time.time()
 
-    batch_size = 1024 * 10  # Batasi pembaruan progress bar setiap 10KB
+    # Batasi pembaruan progress bar setiap 10KB
+    batch_size = 1024 * 10
     next_update = batch_size
 
     for i in range(0, len(data), 16):
@@ -143,6 +178,7 @@ def decrypt_twofish(root):
 
     elapsed_time = time.time() - start_time
     decrypted_data = b''.join(decrypted_blocks)
+    decrypted_size = len(decrypted_data)  # Ukuran file setelah enkripsi
 
     # Pastikan progress bar mencapai nilai maksimum
     decrypt_progress_bar['value'] = len(data)
@@ -151,6 +187,12 @@ def decrypt_twofish(root):
     hours, remainder = divmod(elapsed_time, 3600)
     minutes, seconds = divmod(remainder, 60)
     decrypt_estimated_time_label.config(text=f"Waktu dekripsi: {int(hours)} jam {int(minutes)} menit {int(seconds)} detik / {elapsed_time:.5f} detik.")
+    
+    original_size_kb = int(original_size / 1024)
+    decrypted_size_kb = int(decrypted_size / 1024)
+    original_size_decrypt_label.config(text=f"Ukuran sebelum kompresi: {original_size_kb:} KB")
+    decrypted_size_label.config(text=f"Ukuran setelah kompresi: {decrypted_size_kb:} KB")
+    
     btn_save_decrypted.config(state='normal')
     messagebox.showinfo("Information", f"Dekripsi selesai!")
 
@@ -167,6 +209,7 @@ def save_decrypted_result_file():
                 f.write(decrypted_data)
             messagebox.showinfo("Information", "File berhasil disimpan!")
             btn_save_decrypted.config(state='disabled')
+            decrypt_estimated_time_label.config(text="")
             entry_file_decrypt.config(textvariable="")
             entry_file_decrypt.delete(0, tk.END)
             entry_privkey.delete(1.0, tk.END)
@@ -180,7 +223,7 @@ def show_window(root):
     
     root.title("Enkripsi Twofish")
 
-    # ENCRYPT
+    # Enkripsi
     label_encrypt = tk.Label(root, text="Encrypt File", font=("Arial", 24))
     label_encrypt.place(x=30, y=160)
 
@@ -220,10 +263,18 @@ def show_window(root):
     encrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     encrypt_estimated_time_label.place(x=30, y=500, height=30, width=350)
 
+    global original_size_encrypt_label
+    original_size_encrypt_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    original_size_encrypt_label.place(x=30, y=540, height=30, width=350)
+
+    global encrypted_size_label
+    encrypted_size_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    encrypted_size_label.place(x=30, y=560, height=30, width=350)
+
     separator = ttk.Separator(root, orient='vertical')
     separator.place(x=400, y=0, width = 2, height= 650)
 
-    # DECRYPT
+    # Dekripsi
     label_decrypt = tk.Label(root, text="Decrypt File", font=("Arial", 24))
     label_decrypt.place(x=420, y=160)
 
@@ -263,6 +314,14 @@ def show_window(root):
     decrypt_estimated_time_label = tk.Message(root, text="", font=("Arial", 14), width=350)
     decrypt_estimated_time_label.place(x=420, y=500, height=30, width=350)
 
-    # BACK
+    global original_size_decrypt_label
+    original_size_decrypt_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    original_size_decrypt_label.place(x=420, y=540, height=30, width=350)
+
+    global decrypted_size_label
+    decrypted_size_label = tk.Message(root, text="", font=("Arial", 14), width=350)
+    decrypted_size_label.place(x=420, y=560, height=30, width=350)
+
+    # Button Back
     btn_back = tk.Button(root, text="Kembali", command=lambda: app.show_main_page(root))
     btn_back.place(x=700, y=10, height=30)
